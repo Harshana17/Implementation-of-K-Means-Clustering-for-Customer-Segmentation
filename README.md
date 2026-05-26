@@ -22,39 +22,55 @@ RegisterNumber:  212224240053
 */
 ```
 ```
-import pandas as pd 
+import os
+os.environ["OMP_NUM_THREADS"] = "1"  
+import pandas as pd
 import matplotlib.pyplot as plt
-data=pd.read_csv("Mall_Customers.csv")
-display(data.head())
-data.info()
-data.isnull().sum()
 from sklearn.cluster import KMeans
+
+
+data = pd.read_csv("Mall_Customers.csv")
+print(data.head())
+data.info()
+print(data.isnull().sum())
+
+
 wcss = []
-for i in range(1,11):
-    Kmeans=KMeans (n_clusters = i, init ="k-means++")
-    Kmeans.fit(d.iloc[:,3:])
-    wcss.append(Kmeans.inertia_)
-plt.plot(range(1,11),wcss)
-plt.xlabel("no of cluster")
-plt.ylabel("wcss")
-plt.title("Elbow Metthod")
-km=KMeans(n_clusters=5)
-km.fit(d.iloc[:,3:])
-y_pred = km.predict(d.iloc[:,3:])
-y_pred
-d["clusters"]=y_pred
-df0=d[d["clusters"]==0]
-df1=d[d["clusters"]==1]
-df2=d[d["clusters"]==2]
-df3=d[d["clusters"]==3]
-df4=d[d["clusters"]==4]
-plt.scatter(df0["Annual Income (k$)"],df0["Spending Score (1-100)"],c="red",label="clusters0")
-plt.scatter(df1["Annual Income (k$)"],df1["Spending Score (1-100)"],c="pink",label="clusters1")
-plt.scatter(df2["Annual Income (k$)"],df2["Spending Score (1-100)"],c="green",label="clusters2")
-plt.scatter(df3["Annual Income (k$)"],df3["Spending Score (1-100)"],c="blue",label="clusters3")
-plt.scatter(df4["Annual Income (k$)"],df4["Spending Score (1-100)"],c="black",label="clusters4")
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init="k-means++", n_init=10, random_state=42)  
+    kmeans.fit(data.iloc[:, 3:])
+    wcss.append(kmeans.inertia_)
+
+plt.plot(range(1, 11), wcss)
+plt.xlabel("Number of Clusters")
+plt.ylabel("WCSS")
+plt.title("Elbow Method")
+plt.show()
+
+
+km = KMeans(n_clusters=5, init="k-means++", n_init=10, random_state=42)  # n_init fix
+y_pred = km.fit_predict(data.iloc[:, 3:])  
+data["clusters"] = y_pred
+
+
+df0 = data[data["clusters"] == 0]
+df1 = data[data["clusters"] == 1]
+df2 = data[data["clusters"] == 2]
+df3 = data[data["clusters"] == 3]
+df4 = data[data["clusters"] == 4]
+
+
+plt.scatter(df0["Annual Income (k$)"], df0["Spending Score (1-100)"], c="red",    label="Careful (Low Income, Low Spend)")
+plt.scatter(df1["Annual Income (k$)"], df1["Spending Score (1-100)"], c="pink",   label="Standard")
+plt.scatter(df2["Annual Income (k$)"], df2["Spending Score (1-100)"], c="green",  label="Target (High Income, High Spend)")
+plt.scatter(df3["Annual Income (k$)"], df3["Spending Score (1-100)"], c="blue",   label="Spenders (Low Income, High Spend)")
+plt.scatter(df4["Annual Income (k$)"], df4["Spending Score (1-100)"], c="black",  label="Conservative (High Income, Low Spend)")
+plt.xlabel("Annual Income (k$)")
+plt.ylabel("Spending Score (1-100)")
 plt.legend()
 plt.title("Customer Segments")
+plt.show()
+
 
 ```
 ## Output:
